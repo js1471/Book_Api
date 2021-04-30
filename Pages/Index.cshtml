@@ -1,0 +1,330 @@
+﻿@page
+@model Book_Api.Pages.IndexModel
+@{
+}
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Books</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="~/css/site.css" rel="stylesheet" />
+    
+</head>
+
+<body>
+
+    <div id=" id_tit">
+        <nav class="" id="id_tit">
+         
+           
+
+
+            <div class="collapse navbar-collapse" id="navbarText">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+
+                    </li>
+
+                </ul>
+
+            </div>
+        </nav>
+
+
+        <div class="container">
+            <table class="table table-bordered">
+                <thead >
+                    <tr class="rounded">
+                        <th scope="col">Title</th>
+                        <th scope="col">Discription</th>
+                        <th scope="col">Price $ </th>
+                        <th scope="col">Author</th>
+                        <th>Update </th>
+                        <th>Delete</th>
+
+
+                    </tr>
+                </thead>
+                <tbody id="Books">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+
+
+
+
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.templates/beta1/jquery.tmpl.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script>
+        var uri = 'api/Books';
+
+        $(document).ready(function () {
+            // all books 
+            $.getJSON(uri)
+                .done(function (data) {
+
+                    $("#mybook").tmpl(data).appendTo("#Books");
+                
+                });
+        });
+
+        function remove(id) {
+
+
+            var yes = confirm("Are you sure?");
+
+            if (yes) {
+                $.ajax({
+                    type: "DELETE", // delete method for delete books by id 
+                    url: uri + "/" + id,
+
+                }).done(function (response) {
+
+                    getAllBooks();
+                });
+
+            }
+
+
+        }
+
+
+        function addbook() {
+            var _title = $('#title').val();
+            var _discription = $('#discription').val();
+            var _price = parseInt($('#price').val());
+            var _author = $('#author').val();
+
+            var item = {
+                title: _title, author: _author, discription: _discription, price: parseFloat(_price)
+              
+           
+               
+
+            };
+
+            $.ajax({
+                type: "POST",  // Post method for add books
+                url: uri,
+                data: JSON.stringify(item),
+                contentType: "application/json; charset=utf-8"
+            }).done(function (response) {
+                $("#result").html("Added Successfully");
+                getAllBooks();
+            }).fail(function (jqXHR, textStatus) {
+                $("#result").html("Error");
+            });
+
+
+        }
+
+        function getAllBooks() {
+
+               $.getJSON(uri)
+                   .done(function (data) {
+
+                       $("#Books").text("");
+
+                    $("#mybook").tmpl(data).appendTo("#Books");
+                });
+
+        }
+
+
+        function editbook() {
+              var _title = $('#_title').val();
+            var _discription = $('#_discription').val();
+            var _price = parseInt($('#_price').val());
+            var _author = $('#_author').val();
+
+
+
+            var item = {
+                id: parseInt($('#_id').val()), author: _author, discription: _discription, title: _title, price: parseFloat(_price)
+
+
+
+                
+
+               
+
+
+            };
+
+            $.ajax({
+                type: "PUT",   //put method for update data 
+                url: uri+"/"+ $('#_id').val(),
+                data: JSON.stringify(item),
+                contentType: "application/json; charset=utf-8"
+            }).done(function (response) {
+                $("#res").html("Updated Successfully");
+                getAllBooks();
+            }).fail(function (jqXHR, textStatus) {
+                          $("#res").html("Error");
+               });;
+
+
+
+
+        }
+
+
+
+        function getitem(id) {
+
+             $.ajax({
+                type: "GET",  .// get method for show all books 
+                url: uri+"/"+id,
+               contentType: "application/json"
+             }).done(function (response) {
+
+                  $('#_id').val(response.id);
+                 $('#_discription').val(response.discription);
+                 $('#_title').val(response.title);
+                 $('#_price').val(response.price);
+                 $('#_author').val(response.author);
+
+
+
+
+
+
+            });
+
+
+        }
+    </script>
+
+
+
+    <script id="mybook" type="text/x-jquery-tmpl">
+
+        <tr>
+
+            <td> ${title}</td>
+            <td>${discription}</td>
+
+            <td>${price}</td>
+            <td>
+                ${author}
+            </td>
+
+
+
+
+            <td> <button class="btn text-secondary" onclick="getitem('${id}')" data-toggle="modal" data-target="#editbook">Update</button></td>
+            <td> <a href="#" class="btn text-danger" onclick="remove('${id}')">Delete</a></td>
+
+        </tr>
+    </script>
+
+
+
+    <div class="modal" tabindex="-1" role="dialog" id="addbook">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div>
+                   
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div>
+                            <label >Title</label>
+                            <input type="text" value="" class="form-control" id="title" required>
+
+                        </div>
+                        <div>
+                            <label>Discription</label>
+                            <input type="text" class="form-control" id="discription" required >
+
+                        </div>
+                        <div>
+                            <label>Price</label>
+                            <input type="number" class="form-control" id="price" required >
+
+                        </div>
+                        <div >
+                            <label>Author</label>
+                            <input type="text" class="form-control" id="author" required >
+
+                        </div>
+
+                        <div class="form-group" id="result">
+
+
+                        </div>
+                        <button  type="button" onclick="addbook()" >Submit</button>
+                    </form>
+                </div>
+               
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="modal" tabindex="-1" role="dialog" id="editbook">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+
+                        <div>
+
+                            <input type="hidden" class="form-control" id="_id" aria-describedby="emailHelp">
+
+                        </div>
+
+                        <div>
+                            <label>Title</label>
+                            <input type="text" class="form-control" id="_title" >
+
+                        </div>
+                        <div>
+                            <label>Discription</label>
+                            <input type="text" class="form-control" id="_discription" >
+
+                        </div>
+                        <div>
+                            <label >Price</label>
+                            <input type="number" class="form-control" id="_price">
+
+                        </div>
+                        <div >
+                            <label>Author</label>
+                            <input type="text" class="form-control" id="_author" >
+
+                        </div>
+
+
+
+                        <div class="form-group" id="res">
+
+
+                        </div>
+                        <button type="button" onclick="editbook()" >Update</button>
+                    </form>
+                </div>
+               
+            </div>
+        </div>
+    </div>
+</body>
+</html>
